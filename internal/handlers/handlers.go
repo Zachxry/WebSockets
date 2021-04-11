@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"sort"
+	"strings"
 
 	"github.com/CloudyKit/jet/v6"
 	"github.com/gorilla/websocket"
@@ -29,6 +30,21 @@ var upgradeConnection = websocket.Upgrader{
 	WriteBufferSize: 1024,
 	CheckOrigin:     func(r *http.Request) bool { return true },
 }
+
+// htmlEscaper used to prevent XSS
+var htmlEscaper = strings.NewReplacer(
+
+	`&`, "&amp;",
+
+	`'`, "&#39;", // "&#39;" is shorter than "&apos;" and apos was not in HTML until HTML5.
+
+	`<`, "&lt;",
+
+	`>`, "&gt;",
+
+	`"`, "&#34;", // "&#34;" is shorter than "&quot;".
+
+)
 
 // Home will be used to display a page
 func Home(w http.ResponseWriter, r *http.Request) {
@@ -130,10 +146,15 @@ func ListenWsChannel() {
 			// prints name and message in chat
 		case "broadcast":
 			response.Action = "broadcast"
-			response.Message = fmt.Sprintf("<strong>%s</strong>: %s", e.Username, e.Message)
+			response.Message = EscapeString(fmt.Sprintf("%s: %s", e.Username, e.Message))
 			broadcaster(response)
 		}
 	}
+}
+
+// Escape string returns an html escaped string
+func EscapeString(s string) string {
+	return htmlEscaper.Replace(s)
 }
 
 // getUserList gets and sorts the list of usernames
