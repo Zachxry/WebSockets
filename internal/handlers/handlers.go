@@ -32,7 +32,6 @@ var upgradeConnection = websocket.Upgrader{
 
 // Home will be used to display a page
 func Home(w http.ResponseWriter, r *http.Request) {
-	// Every web handler in Go needs to have two arguments (w http.ResponseWriter and a pointer to a request r *http.Request)
 	err := renderPage(w, "home.html", nil)
 	if err != nil {
 		log.Println(err)
@@ -137,6 +136,7 @@ func ListenWsChannel() {
 	}
 }
 
+// getUserList gets and sorts the list of usernames
 func getUserList() []string {
 	var userList []string
 	for _, x := range clients {
@@ -148,6 +148,7 @@ func getUserList() []string {
 	return userList
 }
 
+// broadcaster prints out client names and chat to all users
 func broadcaster(response WsJsonResponse) {
 	for client := range clients { // for every client listed, send the json-encoded response
 		err := client.WriteJSON(response)
@@ -162,7 +163,7 @@ func broadcaster(response WsJsonResponse) {
 // renderPage will be used for any handler that needs to render a page,
 // takes 3 args, http.ResponseWriter, template to render tmpl of type string, data passed to the template using jet.VarMap
 func renderPage(w http.ResponseWriter, tmpl string, data jet.VarMap) error {
-	view, err := views.GetTemplate(tmpl) // declaring a variable 'view' = to views.GetTemplate(tmpl) to render the template
+	view, err := views.GetTemplate(tmpl) // GetTemplate tries to find (and parse, if not yet parsed) the template at the specified path.
 	if err != nil {
 		log.Println(err)
 		return err
