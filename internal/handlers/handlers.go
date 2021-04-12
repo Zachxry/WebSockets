@@ -146,14 +146,14 @@ func ListenWsChannel() {
 			// prints name and message in chat
 		case "broadcast":
 			response.Action = "broadcast"
-			response.Message = EscapeString(fmt.Sprintf("%s: %s", e.Username, e.Message))
+			response.Message = escapeString(fmt.Sprintf("%s: %s", e.Username, e.Message))
 			broadcaster(response)
 		}
 	}
 }
 
 // Escape string returns an html escaped string
-func EscapeString(s string) string {
+func escapeString(s string) string {
 	return htmlEscaper.Replace(s)
 }
 
