@@ -89,7 +89,7 @@ func WsEndpoint(w http.ResponseWriter, r *http.Request) {
 	response.Message = `<em><small>Connected to server</small></em>`
 
 	conn := WebSocketConnection{Conn: ws}
-	clients[conn] = ""
+	// clients[conn] = ""
 
 	err = ws.WriteJSON(response) // err = pointer to websocket connection. WriteJSON writes the JSON encoding of v as a message.
 	if err != nil {
@@ -152,7 +152,7 @@ func ListenWsChannel() {
 	}
 }
 
-// Escape string returns an html escaped string
+// escapeString returns an html escaped string
 func escapeString(s string) string {
 	return htmlEscaper.Replace(s)
 }
@@ -174,15 +174,14 @@ func broadcaster(response WsJsonResponse) {
 	for client := range clients { // for every client listed, send the json-encoded response
 		err := client.WriteJSON(response)
 		if err != nil { // if client doesn't exist or leaves, log err, close connection, and remove client
-			log.Println("websocket err")
+			log.Println("websocket error")
 			_ = client.Close()
 			delete(clients, client)
 		}
 	}
 }
 
-// renderPage will be used for any handler that needs to render a page,
-// takes 3 args, http.ResponseWriter, template to render tmpl of type string, data passed to the template using jet.VarMap
+// renderPage will be used for any handler that needs to render a page
 func renderPage(w http.ResponseWriter, tmpl string, data jet.VarMap) error {
 	view, err := views.GetTemplate(tmpl) // GetTemplate tries to find (and parse, if not yet parsed) the template at the specified path.
 	if err != nil {
